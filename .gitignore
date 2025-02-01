@@ -1,7 +1,9 @@
-# videos / images / 
+# intermediate files
 *.MOV
 *.jpg
 *.txt
+*.json
+*.mp3
 
 # runtime files
 **/__pycache__
