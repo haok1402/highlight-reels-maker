@@ -3,5 +3,5 @@
 source .env
 
 conda run -n maker \
-    python3 -m functions.generate_description \
+    python3 -m functions.generate_video_context \
         --workspace new-york

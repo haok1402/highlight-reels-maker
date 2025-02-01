@@ -1,0 +1,7 @@
+{
+    "editor.wordWrap": "on",
+    "files.exclude": {
+        "**/.git": true,
+        "**/__pycache__": true
+    }
+}

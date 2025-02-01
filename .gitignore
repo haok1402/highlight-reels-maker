@@ -5,7 +5,7 @@
 
 # runtime files
 **/__pycache__
-main.log
+logging/
 
 # secret files
 *.env

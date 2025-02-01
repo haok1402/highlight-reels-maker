@@ -8,6 +8,7 @@ to describe the frame directly, so multiple objects in the frame can be better
 discerned during the lookup process.
 
 @author: Hao Kang <haok1402@gmail.com>
+@date: February 1, 2025
 """
 
 import base64
@@ -19,7 +20,6 @@ from typing import List
 from pathlib import Path
 
 import openai
-import pinecone
 import aiofiles
 
 
@@ -30,6 +30,7 @@ def extract_frames(workspace: Path, videoFile: Path) -> List[Path]:
 
     :param workspace: Path to the workspace.
     :param videoFile: Path to the video file.
+    :return: List of paths to the extracted frames.
     """
     if workspace.exists():
         return list(workspace.glob("*.jpg"))
@@ -43,7 +44,7 @@ def extract_frames(workspace: Path, videoFile: Path) -> List[Path]:
             "-i",
             videoFile,
             "-vf",
-            "fps=0.5,scale=iw/4:ih/4",
+            "fps=1,scale=iw/4:ih/4",
             f"{workspace}/frame_%04d.jpg",
         ],
     )
@@ -57,6 +58,14 @@ async def describe_frame(
     frameFile: Path,
     semaphore: asyncio.Semaphore,
 ):
+    """
+    Generate description for a single frame using OpenAI's GPT-4 model.
+
+    :param workspace: Path to the workspace.
+    :param client: OpenAI client.
+    :param frameFile: Path to the frame file.
+    :param semaphore: Semaphore to limit the number of concurrent requests.
+    """
     logging.info(f"Describing {frameFile}.")
 
     async with aiofiles.open(frameFile, "rb") as f:
@@ -98,10 +107,11 @@ async def describe(workspace: Path, keyframes: List[Path]):
     if workspace.exists():
         return
 
+    logging.info(f"Describing key frames in {workspace}.")
     workspace.mkdir(parents=True, exist_ok=True)
 
     client = openai.AsyncClient()
-    semaphore = asyncio.Semaphore(2)
+    semaphore = asyncio.Semaphore(2)  # stay under the rate limit
 
     await asyncio.gather(
         *[describe_frame(workspace, client, frame, semaphore) for frame in keyframes]
@@ -109,6 +119,9 @@ async def describe(workspace: Path, keyframes: List[Path]):
 
 
 async def main():
+    """
+    Generate description for key frames in the video.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--workspace", type=Path, required=True)
     parsed = parser.parse_args()
@@ -118,16 +131,15 @@ async def main():
     sourceFolder = Path(parsed.workspace, "source")
     assert sourceFolder.exists(), "Source folder does not exist."
 
-    keyframesFolder = Path(workspace, "keyframes")
+    keyframesFolder = Path(workspace, "video_keyframes")
     keyframesFolder.mkdir(parents=True, exist_ok=True)
-    descriptionsFolder = Path(workspace, "descriptions")
-    descriptionsFolder.mkdir(parents=True, exist_ok=True)
+    contextFolder = Path(workspace, "video_context")
+    contextFolder.mkdir(parents=True, exist_ok=True)
 
     for videoFile in sourceFolder.glob("*.MOV"):
         stem = videoFile.stem
         frames = extract_frames(Path(keyframesFolder, stem), videoFile)
-        await describe(Path(descriptionsFolder, stem), frames)
-        break
+        await describe(Path(contextFolder, stem), frames)
 
 
 if __name__ == "__main__":
