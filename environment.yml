@@ -1,0 +1,14 @@
+name: maker
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.12
+  - pip
+  - openai
+  - numpy
+  - aiofiles
+  - pip:
+      - pinecone

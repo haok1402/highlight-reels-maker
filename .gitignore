@@ -1,0 +1,11 @@
+# videos / images / 
+*.MOV
+*.jpg
+*.txt
+
+# runtime files
+**/__pycache__
+main.log
+
+# secret files
+*.env
