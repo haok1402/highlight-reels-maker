@@ -11,4 +11,4 @@ dependencies:
   - numpy
   - aiofiles
   - pip:
-      - pinecone
+      - pinecone[grpc]

@@ -111,7 +111,7 @@ async def describe(workspace: Path, keyframes: List[Path]):
     workspace.mkdir(parents=True, exist_ok=True)
 
     client = openai.AsyncClient()
-    semaphore = asyncio.Semaphore(2)  # stay under the rate limit
+    semaphore = asyncio.Semaphore(4)  # stay under the rate limit
 
     await asyncio.gather(
         *[describe_frame(workspace, client, frame, semaphore) for frame in keyframes]
