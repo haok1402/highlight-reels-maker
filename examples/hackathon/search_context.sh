@@ -4,4 +4,4 @@ source .env
 
 conda run -n maker \
     python3 -m functions.search_context \
-        --query "a person eating pizza walking on the street"
+        --query "a person walking on the street holding a pizza"

@@ -10,5 +10,7 @@ dependencies:
   - openai
   - numpy
   - aiofiles
+  - retry
   - pip:
       - pinecone[grpc]
+      - moviepy

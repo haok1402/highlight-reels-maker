@@ -21,6 +21,7 @@ from pathlib import Path
 
 import openai
 import aiofiles
+from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 
 def extract_frames(workspace: Path, videoFile: Path) -> List[Path]:
@@ -52,6 +53,10 @@ def extract_frames(workspace: Path, videoFile: Path) -> List[Path]:
     return list(workspace.glob("*.jpg"))
 
 
+@retry(
+    stop=stop_after_attempt(5),
+    wait=wait_random_exponential(multiplier=2, min=4, max=32),
+)
 async def describe_frame(
     workspace: Path,
     client: openai.AsyncClient,
@@ -111,7 +116,7 @@ async def describe(workspace: Path, keyframes: List[Path]):
     workspace.mkdir(parents=True, exist_ok=True)
 
     client = openai.AsyncClient()
-    semaphore = asyncio.Semaphore(4)  # stay under the rate limit
+    semaphore = asyncio.Semaphore(2)  # stay under the rate limit
 
     await asyncio.gather(
         *[describe_frame(workspace, client, frame, semaphore) for frame in keyframes]

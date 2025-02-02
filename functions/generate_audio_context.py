@@ -34,12 +34,10 @@ def process_video(
 
     # segments = []
     logging.info("Segmenting transcript...")
-    for segment in transcription.segments:
+    for idx, segment in enumerate(transcription.segments):
         # print("raw segment:", segment)
         # input("Press Enter to continue...")
 
-        start = round(segment.start)
-        end = round(segment.end)
         raw_text = segment.text
         summary = client.chat.completions.create(
             model="gpt-4o",
@@ -61,10 +59,12 @@ def process_video(
 
         # Save segment to a separate file
         segment_data = {
+            "start": segment.start,
+            "end": segment.end,
             "summary": summary,
             "raw_text": raw_text,
         }
-        segment_filename = f"{transcript_workspace}/{start}-{end}.json"
+        segment_filename = f"{transcript_workspace}/segment{idx:04d}.json"
         with open(segment_filename, "w", encoding="utf-8") as f:
             json.dump(segment_data, f, indent=4, ensure_ascii=False)
 

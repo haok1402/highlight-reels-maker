@@ -12,6 +12,7 @@ from collections import defaultdict
 from typing import List, Dict, Any, DefaultDict, Tuple
 
 import openai
+import datetime
 from pinecone.grpc import PineconeGRPC as Pinecone
 
 
@@ -52,7 +53,8 @@ def main():
     Search for the relevant frames in the video for the given query.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--query", type=str)
+    parser.add_argument("--query", type=str, required=True)
+    # parser.add_argument("--dumpPath", type=str, required=True)
     parsed = parser.parse_args()
 
     client = openai.Client()
@@ -68,15 +70,35 @@ def main():
     videoIndex = pc.Index("video-context")
     videoResults = videoIndex.query(
         vector=embedding,
-        top_k=8,
+        top_k=3,
         include_values=False,
         include_metadata=True,
     )
 
+    print(videoResults.matches)
+
     # Use video as the primary search context and let audio be the secondary
     # heuristics for finding the relevant frames
-    vName, sIndex, eIndex = findHeavyRange(videoResults.matches)
-    print(f"Video: {vName}, Start: {sIndex}, End: {eIndex}")
+    # vName, sIndex, eIndex = findHeavyRange(videoResults.matches)
+    # sTime = str(datetime.timedelta(seconds=sIndex))
+    # eTime = str(datetime.timedelta(seconds=eIndex))
+
+    # # Extract the clips from the video.
+    # subprocess.run(
+    #     [
+    #         "ffmpeg",
+    #         "-y",
+    #         "-i",
+    #         vName,
+    #         "-ss",
+    #         sTime,
+    #         "-to",
+    #         eTime,
+    #         "-c",
+    #         "copy",
+    #         parsed.dumpPath,
+    #     ],
+    # )
 
 
 if __name__ == "__main__":

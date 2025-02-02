@@ -1,4 +1,6 @@
 {
+    "python.terminal.activateEnvInCurrentTerminal": false,
+    "python.terminal.activateEnvironment": false,
     "editor.wordWrap": "on",
     "files.exclude": {
         "**/.git": true,

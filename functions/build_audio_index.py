@@ -45,7 +45,6 @@ async def store_frame(
     data = json.loads(content)
     summary = data.get("summary", "")
     print(f"Summary of {str(contextFile)}:", summary)
-    input("Press Enter to continue...")
 
     async with semaphore:
         response = await client.embeddings.create(
@@ -95,7 +94,7 @@ async def main():
     await asyncio.gather(
         *[
             store_frame(client, semaphore, contextFile, index)
-            for contextFile in contextFolder.rglob("*.txt")
+            for contextFile in contextFolder.rglob("*.json")
         ]
     )
 
